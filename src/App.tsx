@@ -1,25 +1,60 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+import { supabase } from './supabaseClient';
+import { ItemTimeline, TimelineEvent } from './components/ItemTimeline';
+import { exportTimelineToPDF } from './exportTimelineToPDF';
+import { AddEventForm } from './components/AddEventForm';
 
 function App() {
+  const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // פונקציה לשליפת אירועים מה־Supabase
+  const fetchEvents = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('timeline_events')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('שגיאה בשליפה:', error);
+    } else {
+      setEvents(data as TimelineEvent[]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <main className="App p-4 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6 text-center">🚀 טיימליין פרויקט</h1>
+
+      {/* טופס להוספת אירועים */}
+      <AddEventForm onAdd={fetchEvents} />
+
+      {/* טיימליין */}
+      <div id="timeline-to-export" className="mt-6">
+        {loading ? (
+          <p>טוען אירועים...</p>
+        ) : (
+          <ItemTimeline events={events} />
+        )}
+      </div>
+
+      {/* כפתור הורדה */}
+      <div className="text-center mt-6">
+        <button
+          onClick={exportTimelineToPDF}
+          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          הורד כ־PDF
+        </button>
+      </div>
+    </main>
   );
 }
 
