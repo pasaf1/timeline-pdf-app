@@ -45,8 +45,7 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
-    ,
+  },
   "overrides": {
     "react-vertical-timeline-component": {
       "react": "19.1.1"
@@ -55,5 +54,4 @@
       "react": "19.1.1"
     }
   }
-
 }
